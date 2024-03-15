@@ -1,0 +1,59 @@
+movie:(id,title,yr,director,budget,gross)
+actor:(id,name)
+casting:(movieid,actorid,ord)
+
+
+# List the films where 'Harrison Ford' has appeared - but not in the starring role. 
+select m.title
+from casting c 
+join movie m on m.id = c.movieid
+join actor a on a.id = c.actorid
+where c.ord != 1 and a.name = 'Harrison Ford'
+
+
+# List the films together with the leading star for all 1962 films.
+select m.title,a.name
+from casting c 
+join movie m on m.id = c.movieid
+join actor a on a.id = c.actorid
+where m.yr = 1962 and c.ord = 1
+
+
+# Which were the busiest years for 'Rock Hudson', show the year and the number of movies he made each year for any year in which he made more than 2 movies.
+select m.yr,count(m.yr)
+from casting c 
+join actor a on c.actorid = a.id
+join movie m on m.id = c.movieid
+where a.name = 'Rock Hudson'
+group by m.yr
+having count(m.yr) > 2
+
+
+# List the film title and the leading actor for all of the films 'Julie Andrews' played in.
+Select m.title, a.name
+from casting c 
+join movie m on m.id = c.movieid
+join actor a on a.id = c.actorid
+where c.movieid in (select movieid
+from casting c 
+join actor a on a.id = c.actorid
+where a.name = 'Julie Andrews'
+group by movieid)
+and c.ord = 1
+
+
+# List the films released in the year 1978 ordered by the number of actors in the cast, then by title.
+select m.title, count(actorid) as numofactor
+from movie m join casting c on m.id = c.movieid
+where m.yr = 1978
+group by m.title
+order by count(actorid) desc, m.title
+
+
+# List all the people who have worked with 'Art Garfunkel'.
+select distinct name
+from actor a join casting c on a.id = c.actorid
+where movieid in (select movieid
+					from actor a join casting c on a.id = c.actorid
+					where a.name = 'Art garfunkel')
+and a.name != 'Art garfunkel'
